@@ -1,6 +1,8 @@
 # 更新日志 
 
 
+### [2.0.8](https://github.com/wot-ui/wot-ui/compare/v2.0.7...v2.0.8) (2026-05-12)
+
 ### [2.0.7](https://github.com/wot-ui/wot-ui/compare/v2.0.6...v2.0.7) (2026-05-12)
 
 ### [2.0.6](https://github.com/wot-ui/wot-ui/compare/v2.0.5...v2.0.6) (2026-05-12)
