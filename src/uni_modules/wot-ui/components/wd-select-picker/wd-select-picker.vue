@@ -181,16 +181,12 @@ watch(
 watch(
   () => getColumnsWatchKey(props.columns),
   () => {
+    // 远程搜索模式下，filterColumns 由 executeRemoteSearch 统一管理，不做任何操作
+    if (props.remoteMethod) return
     const newValue = props.columns
-    // 远程搜索模式下，filterColumns 由 executeRemoteSearch / nextTick 统一管理
-    // 此处不覆盖，避免选中项同步到 columns 时把列表刷成只有选中项
     if (props.filterable && filterVal.value) {
-      if (props.remoteMethod) {
-        filterColumns.value = []
-      } else {
-        formatFilterColumns(newValue, filterVal.value)
-      }
-    } else if (!props.remoteMethod) {
+      formatFilterColumns(newValue, filterVal.value)
+    } else {
       filterColumns.value = newValue
     }
   },
@@ -224,7 +220,13 @@ async function setScrollIntoView() {
     targetSelector = `#radio${selectList.value}`
   } else if (isArray(selectList.value) && selectList.value.length > 0) {
     wraperSelector = '#wd-checkbox-group'
-    targetSelector = `#check${selectList.value[0]}`
+    // 找到 filterColumns 中最靠前的已选项作为滚动目标
+    // （因为远程搜索会把部分选中项置顶插入，selectList.value[0] 可能不是最顶部的）
+    const { valueKey } = props
+    const selectedVals = new Set(selectList.value.map((v: any) => v))
+    const topmost = filterColumns.value.find((item: Record<string, any>) => selectedVals.has(item[valueKey]))
+    const targetVal = topmost ? topmost[valueKey] : selectList.value[0]
+    targetSelector = `#check${targetVal}`
   }
   if (wraperSelector && targetSelector) {
     await pause(2000 / 30)
@@ -255,10 +257,10 @@ function onAfterEnter() {
   if (!props.remoteMethod && props.scrollIntoView) {
     setScrollIntoView()
   }
-  // 始终触发远程搜索（空 keyword 时拉取默认数据）
+  // 始终触发远程搜索（空 keyword 时拉取默认数据，初始加载不经过防抖）
   if (props.remoteMethod) {
     remoteLoading.value = true
-    debouncedRemoteSearch(filterVal.value)
+    executeRemoteSearch(filterVal.value)
   }
 }
 
@@ -324,27 +326,10 @@ function buildSyncColumns(value: any): Record<string, any>[] {
 function handleChange({ value }: { value: string | number | boolean | (string | number | boolean)[] }) {
   selectList.value = value
   emit('change', { value })
-  // 远程搜索：选中项立即双向同步到 columns（columns watch 会清空 filterColumns，nextTick 恢复）
+  // 远程搜索：选中项立即双向同步到 columns（filterColumns 不受影响，保持当前搜索结果）
   if (props.remoteMethod) {
-    const values = toValueList(value)
     const newColumns = buildSyncColumns(value)
-    // 同步到 columns（触发 columns watch → filterColumns = []）
     emit('update:columns', newColumns)
-    // 等 columns watch 清空后，将当前选中项补回列表（带高亮）
-    nextTick(() => {
-      const restored = [...filterColumns.value]
-      let changed = false
-      values.forEach((val) => {
-        if (!restored.some((item) => item[props.valueKey] === val)) {
-          const item = findInRemote(val)
-          if (item) {
-            restored.push(highlightIfSearch({ ...item }, filterVal.value))
-            changed = true
-          }
-        }
-      })
-      if (changed) filterColumns.value = restored
-    })
   }
   if (props.type === 'radio' && !props.showConfirm) {
     onConfirm()

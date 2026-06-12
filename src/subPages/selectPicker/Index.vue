@@ -50,9 +50,9 @@
           </wd-cell-group>
           <wd-select-picker filterable v-model="value18" v-model:visible="show18" type="radio" :columns="columns1" @confirm="handleConfirm" />
         </demo-group-item>
-        <demo-group-item title="远程搜索" no-padding>
+        <demo-group-item :title="$t('yuan-cheng-sou-suo')" no-padding>
           <wd-cell-group border>
-            <wd-cell title="远程搜索" :value="getDisplayValue(value20)" is-link @click="show20 = true" />
+            <wd-cell :title="$t('yuan-cheng-sou-suo')" :value="getDisplayValue(value20)" is-link @click="show20 = true" />
           </wd-cell-group>
           <wd-select-picker
             filterable
@@ -63,9 +63,9 @@
             @confirm="handleConfirm"
           />
         </demo-group-item>
-        <demo-group-item title="单选远程搜索" no-padding>
+        <demo-group-item :title="$t('dan-xuan-yuan-cheng-sou-suo')" no-padding>
           <wd-cell-group border>
-            <wd-cell title="单选远程搜索" :value="getRadioDisplayValue(value21)" is-link @click="show21 = true" />
+            <wd-cell :title="$t('dan-xuan-yuan-cheng-sou-suo')" :value="getRadioDisplayValue(value21)" is-link @click="show21 = true" />
           </wd-cell-group>
           <wd-select-picker
             filterable
@@ -188,7 +188,7 @@ const columns20 = ref<Record<string, any>[]>([{ value: '102', label: t('she-chi-
 const columns21 = ref<Record<string, any>[]>([{ value: '102', label: t('she-chi-pin') }])
 
 function remoteMethod(keyword: string, callback: (data: Record<string, any>[]) => void) {
-  // 模拟远程搜索，500ms 后返回过滤后的结果
+  // 模拟远程搜索，300ms 后返回过滤后的结果
   setTimeout(() => {
     const filtered = columns1.value.filter((item) => item.label.indexOf(keyword) > -1)
     if (keyword && !filtered.length) {

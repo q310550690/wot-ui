@@ -91,8 +91,12 @@ const columns = ref([
 
 ```ts
 function remoteMethod(keyword: string, callback: (data: Record<string, any>[]) => void) {
-  fetch(`/api/search?q=${keyword}`).then((res) => {
-    callback(res.data)
+  uni.request({
+    url: '/api/search',
+    data: { q: keyword },
+    success: (res) => {
+      callback(res.data as Record<string, any>[])
+    }
   })
 }
 ```
